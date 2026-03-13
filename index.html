@@ -27,14 +27,14 @@ body { font-family:'DM Sans',sans-serif; background:var(--cream); color:var(--es
 header { background:var(--espresso); padding:12px 20px; display:flex; align-items:center; gap:14px; flex-shrink:0; z-index:10; box-shadow:0 2px 12px rgba(0,0,0,0.3); }
 .logo { font-family:'Playfair Display',serif; color:var(--latte); font-size:1.4rem; white-space:nowrap; }
 .logo span { color:var(--foam); }
-.search-bar { flex:1; display:flex; align-items:center; background:rgba(255,255,255,0.08); border:1px solid rgba(196,149,106,0.3); border-radius:10px; padding:0 14px; gap:8px; max-width:460px; transition:border-color 0.2s; }
-.search-bar:focus-within { border-color:var(--latte); }
-.search-bar input { background:none; border:none; outline:none; color:var(--foam); font-family:'DM Sans',sans-serif; font-size:0.88rem; width:100%; padding:10px 0; }
-.search-bar input::placeholder { color:rgba(237,224,206,0.4); }
-.btn-search { background:var(--latte); color:var(--espresso); border:none; padding:9px 18px; border-radius:8px; font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.84rem; cursor:pointer; transition:background 0.2s; white-space:nowrap; }
-.btn-search:hover { background:var(--latte-light); }
-.btn-locate { background:rgba(255,255,255,0.08); border:1px solid rgba(196,149,106,0.3); color:var(--latte); padding:9px 12px; border-radius:8px; cursor:pointer; font-size:0.95rem; transition:background 0.2s; white-space:nowrap; }
-.btn-locate:hover { background:rgba(196,149,106,0.15); }
+.location-status { flex:1; display:flex; align-items:center; gap:8px; }
+.location-dot { width:8px; height:8px; border-radius:50%; background:#4ade80; flex-shrink:0; animation:pulse 2s infinite; }
+.location-dot.searching { background:var(--latte); }
+.location-dot.error { background:#f87171; animation:none; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+.location-text { font-size:0.82rem; color:rgba(237,224,206,0.7); }
+.btn-recenter { background:rgba(255,255,255,0.08); border:1px solid rgba(196,149,106,0.3); color:var(--latte); padding:8px 14px; border-radius:8px; cursor:pointer; font-size:0.82rem; font-family:'DM Sans',sans-serif; font-weight:500; transition:background 0.2s; white-space:nowrap; }
+.btn-recenter:hover { background:rgba(196,149,106,0.15); }
 
 /* LAYOUT */
 .main { display:flex; flex:1; overflow:hidden; }
@@ -44,18 +44,8 @@ header { background:var(--espresso); padding:12px 20px; display:flex; align-item
 .sidebar::-webkit-scrollbar { width:3px; }
 .sidebar::-webkit-scrollbar-thumb { background:rgba(107,63,42,0.2); border-radius:4px; }
 
-/* API BANNER */
-.api-banner { margin:14px; background:linear-gradient(135deg,var(--espresso),var(--mocha)); border-radius:12px; padding:16px; color:var(--foam); }
-.api-banner h3 { font-family:'Playfair Display',serif; font-size:0.95rem; margin-bottom:6px; color:var(--latte); }
-.api-banner p { font-size:0.78rem; line-height:1.5; opacity:0.85; margin-bottom:10px; }
-.api-input-row { display:flex; gap:8px; }
-.api-input { flex:1; background:rgba(255,255,255,0.1); border:1px solid rgba(196,149,106,0.4); border-radius:7px; padding:8px 10px; color:var(--foam); font-family:'DM Sans',sans-serif; font-size:0.8rem; outline:none; }
-.api-input:focus { border-color:var(--latte); }
-.btn-apply { background:var(--latte); color:var(--espresso); border:none; padding:8px 14px; border-radius:7px; font-weight:600; font-size:0.8rem; cursor:pointer; }
-.btn-apply:hover { background:var(--latte-light); }
-
 /* FILTERS */
-.filters { padding:10px 14px; border-bottom:1px solid rgba(44,26,14,0.08); display:none; flex-direction:column; gap:8px; background:var(--foam2); }
+.filters { padding:10px 14px; border-bottom:1px solid rgba(44,26,14,0.08); flex-direction:column; gap:8px; background:var(--foam2); display:flex; }
 .filter-row { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
 .filter-label { font-size:0.72rem; font-weight:600; color:var(--mocha); text-transform:uppercase; letter-spacing:0.07em; min-width:42px; }
 .filter-btn { background:white; border:1px solid rgba(107,63,42,0.2); color:var(--mocha); padding:5px 11px; border-radius:20px; font-size:0.76rem; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; }
@@ -63,7 +53,7 @@ header { background:var(--espresso); padding:12px 20px; display:flex; align-item
 .filter-btn.active { background:var(--espresso); border-color:var(--espresso); color:var(--foam); }
 
 /* RESULTS HEADER */
-.sidebar-header { padding:10px 14px 8px; border-bottom:1px solid rgba(44,26,14,0.08); position:sticky; top:0; background:var(--foam); z-index:2; display:none; }
+.sidebar-header { padding:10px 14px 8px; border-bottom:1px solid rgba(44,26,14,0.08); position:sticky; top:0; background:var(--foam); z-index:2; }
 .results-count { font-size:0.75rem; color:var(--mocha); font-weight:600; text-transform:uppercase; letter-spacing:0.07em; }
 
 /* CARDS */
@@ -71,27 +61,26 @@ header { background:var(--espresso); padding:12px 20px; display:flex; align-item
 .cafe-card { background:white; border-radius:12px; overflow:hidden; cursor:pointer; transition:box-shadow 0.2s,transform 0.15s; border:2px solid transparent; box-shadow:0 1px 4px var(--shadow); }
 .cafe-card:hover { box-shadow:0 4px 14px var(--shadow); transform:translateY(-1px); }
 .cafe-card.active { border-color:var(--latte); }
-
 .card-photo { width:100%; height:110px; object-fit:cover; display:block; background:#e8ddd0; }
 .card-photo-placeholder { width:100%; height:110px; background:linear-gradient(135deg,#e8ddd0,#d4c4b0); display:flex; align-items:center; justify-content:center; font-size:2rem; color:rgba(107,63,42,0.3); }
-
 .card-body { padding:10px 12px 11px; }
 .card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:6px; margin-bottom:3px; }
 .cafe-name { font-family:'Playfair Display',serif; font-size:0.92rem; font-weight:700; color:var(--espresso); line-height:1.3; }
 .open-badge { font-size:0.68rem; font-weight:600; padding:2px 7px; border-radius:20px; white-space:nowrap; flex-shrink:0; margin-top:2px; }
 .open-badge.open { background:var(--green-bg); color:var(--green); }
 .open-badge.closed { background:var(--red-bg); color:var(--red); }
-.cafe-address { font-size:0.74rem; color:var(--mocha); margin-bottom:7px; opacity:0.75; line-height:1.3; }
-.card-bottom { display:flex; align-items:center; gap:8px; }
+.cafe-address { font-size:0.74rem; color:var(--mocha); margin-bottom:6px; opacity:0.75; line-height:1.3; }
+.card-bottom { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .stars { display:flex; gap:1px; }
 .star { font-size:0.8rem; }
 .star.filled { color:#f59e0b; }
 .star.empty { color:#d1c4b0; }
 .rating-text { font-size:0.8rem; font-weight:600; color:var(--espresso); }
 .review-count { font-size:0.72rem; color:var(--mocha); opacity:0.65; }
+.distance-badge { margin-left:auto; background:var(--foam); border-radius:20px; padding:3px 9px; font-size:0.72rem; font-weight:600; color:var(--mocha); white-space:nowrap; }
 
 /* EMPTY / LOADING */
-.empty-state { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; text-align:center; gap:8px; }
+.empty-state { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; text-align:center; gap:8px; min-height:200px; }
 .empty-icon { font-size:2.2rem; }
 .empty-title { font-family:'Playfair Display',serif; font-size:1rem; color:var(--mocha); }
 .empty-sub { font-size:0.79rem; color:var(--mocha); opacity:0.6; line-height:1.5; }
@@ -104,7 +93,6 @@ header { background:var(--espresso); padding:12px 20px; display:flex; align-item
 /* DETAIL PANEL */
 .detail-panel { position:fixed; top:0; right:0; width:380px; height:100vh; background:white; z-index:100; box-shadow:-4px 0 30px rgba(44,26,14,0.15); transform:translateX(100%); transition:transform 0.35s cubic-bezier(0.4,0,0.2,1); display:flex; flex-direction:column; overflow:hidden; }
 .detail-panel.open { transform:translateX(0); }
-
 .detail-photos { position:relative; height:200px; background:#e8ddd0; flex-shrink:0; overflow:hidden; }
 .detail-photos img { width:100%; height:100%; object-fit:cover; }
 .detail-photos-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:3rem; color:rgba(107,63,42,0.25); background:linear-gradient(135deg,#e8ddd0,#d4c4b0); }
@@ -112,34 +100,25 @@ header { background:var(--espresso); padding:12px 20px; display:flex; align-item
 .photo-dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.5); cursor:pointer; transition:background 0.2s; }
 .photo-dot.active { background:white; }
 .photo-prev, .photo-next { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.35); color:white; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; justify-content:center; transition:background 0.2s; }
-.photo-prev { left:10px; }
-.photo-next { right:10px; }
+.photo-prev { left:10px; } .photo-next { right:10px; }
 .photo-prev:hover, .photo-next:hover { background:rgba(0,0,0,0.6); }
-
 .btn-close { position:absolute; top:12px; left:12px; background:rgba(0,0,0,0.4); border:none; color:white; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; z-index:5; transition:background 0.2s; }
 .btn-close:hover { background:rgba(0,0,0,0.65); }
-
 .detail-body { flex:1; overflow-y:auto; padding:18px 20px; }
 .detail-body::-webkit-scrollbar { width:3px; }
-.detail-body::-webkit-scrollbar-thumb { background:rgba(107,63,42,0.15); }
-
 .detail-name { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--espresso); line-height:1.2; margin-bottom:6px; }
 .detail-meta { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
 .detail-rating { display:flex; align-items:center; gap:5px; }
 .detail-rating .stars .star { font-size:0.9rem; }
 .detail-rating-num { font-size:0.9rem; font-weight:700; color:var(--espresso); }
 .detail-reviews-count { font-size:0.8rem; color:var(--mocha); opacity:0.7; }
-
 .detail-info { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; padding:12px; background:var(--foam2); border-radius:10px; }
 .info-row { display:flex; gap:10px; align-items:flex-start; font-size:0.82rem; }
 .info-icon { font-size:0.95rem; flex-shrink:0; margin-top:1px; }
 .info-text { color:var(--espresso); line-height:1.4; }
-.info-text a { color:var(--mocha); text-decoration:none; border-bottom:1px solid rgba(107,63,42,0.3); transition:color 0.2s; }
+.info-text a { color:var(--mocha); text-decoration:none; border-bottom:1px solid rgba(107,63,42,0.3); }
 .info-text a:hover { color:var(--latte); }
-
 .section-title { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:var(--espresso); margin-bottom:10px; }
-
-/* REVIEWS */
 .reviews-list { display:flex; flex-direction:column; gap:12px; }
 .review-card { padding:12px; background:var(--foam2); border-radius:10px; border-left:3px solid var(--latte); }
 .review-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
@@ -148,39 +127,51 @@ header { background:var(--espresso); padding:12px 20px; display:flex; align-item
 .review-stars { display:flex; gap:1px; margin-bottom:5px; }
 .review-stars .star { font-size:0.78rem; }
 .review-text { font-size:0.8rem; color:var(--mocha); line-height:1.5; }
-
 .detail-actions { display:flex; gap:8px; padding:14px 20px; border-top:1px solid rgba(44,26,14,0.08); flex-shrink:0; }
 .btn-action { flex:1; padding:10px; border-radius:9px; font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.82rem; cursor:pointer; transition:all 0.2s; text-align:center; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px; }
 .btn-directions { background:var(--espresso); color:var(--foam); border:none; }
 .btn-directions:hover { background:var(--mocha); }
 .btn-website { background:white; color:var(--espresso); border:2px solid rgba(44,26,14,0.15); }
-.btn-website:hover { border-color:var(--latte); color:var(--mocha); }
+.btn-website:hover { border-color:var(--latte); }
 
 /* OVERLAY */
 .overlay { position:fixed; inset:0; background:rgba(44,26,14,0.3); z-index:99; opacity:0; pointer-events:none; transition:opacity 0.3s; }
 .overlay.show { opacity:1; pointer-events:all; }
+
+/* PERMISSION SCREEN */
+.permission-screen { position:fixed; inset:0; background:var(--cream); z-index:200; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:40px; text-align:center; }
+.big-icon { font-size:4rem; }
+.permission-screen h2 { font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--espresso); }
+.permission-screen p { font-size:0.9rem; color:var(--mocha); line-height:1.6; max-width:320px; opacity:0.8; }
+.btn-allow { background:var(--espresso); color:var(--foam); border:none; padding:14px 32px; border-radius:12px; font-family:'DM Sans',sans-serif; font-weight:600; font-size:1rem; cursor:pointer; transition:background 0.2s; }
+.btn-allow:hover { background:var(--mocha); }
 </style>
 </head>
 <body>
 
+<div class="permission-screen" id="permissionScreen">
+  <div class="big-icon">📍</div>
+  <h2>Find Cafés Near You</h2>
+  <p>Allow location access to discover cafés around you, see how far they are, and get live updates as you move.</p>
+  <button class="btn-allow" onclick="startTracking()">Allow Location & Start</button>
+</div>
+
 <header>
   <div class="logo">☕ <span>Café</span>Finder</div>
-  <div class="search-bar">
-    <span style="color:var(--latte)">🔍</span>
-    <input type="text" id="searchInput" placeholder="Search city or area…" />
+  <div class="location-status">
+    <div class="location-dot searching" id="locationDot"></div>
+    <span class="location-text" id="locationText">Getting your location…</span>
   </div>
-  <button class="btn-search" onclick="searchCafes()">Find Cafés</button>
-  <button class="btn-locate" onclick="useMyLocation()" title="Near me">📍 Near Me</button>
+  <button class="btn-recenter" onclick="recenter()">📍 Recenter</button>
 </header>
 
 <div class="main">
-  <div class="sidebar" id="sidebar">
-    <div class="filters" id="filtersBar">
+  <div class="sidebar">
+    <div class="filters">
       <div class="filter-row">
         <span class="filter-label">Sort</span>
-        <button class="filter-btn active" onclick="setSort('prominence',this)">Relevance</button>
+        <button class="filter-btn active" onclick="setSort('distance',this)">Nearest</button>
         <button class="filter-btn" onclick="setSort('rating',this)">Top Rated</button>
-        <button class="filter-btn" onclick="setSort('distance',this)">Nearest</button>
       </div>
       <div class="filter-row">
         <span class="filter-label">Show</span>
@@ -189,124 +180,153 @@ header { background:var(--espresso); padding:12px 20px; display:flex; align-item
         <button class="filter-btn" onclick="setFilter('rated',this)">4★ & above</button>
       </div>
     </div>
-
-    <div class="sidebar-header" id="sidebarHeader">
-      <div class="results-count" id="resultsCount">Search to find cafés</div>
+    <div class="sidebar-header">
+      <div class="results-count" id="resultsCount">Waiting for location…</div>
     </div>
-
     <div class="cafe-list" id="cafeList">
       <div class="empty-state">
-        <div class="empty-icon">🗺️</div>
-        <div class="empty-title">No results yet</div>
-        <div class="empty-sub">Add your API key, then search a location or tap "Near Me".</div>
+        <div class="empty-icon">☕</div>
+        <div class="empty-title">Ready to explore</div>
+        <div class="empty-sub">Allow location access to find cafés near you.</div>
       </div>
     </div>
   </div>
-
   <div id="map"></div>
 </div>
 
-<!-- Detail Panel -->
 <div class="overlay" id="overlay" onclick="closeDetail()"></div>
 <div class="detail-panel" id="detailPanel">
   <div class="detail-photos" id="detailPhotos">
     <button class="btn-close" onclick="closeDetail()">✕</button>
-    <button class="photo-prev" id="photoPrev" onclick="changePhoto(-1)">‹</button>
-    <button class="photo-next" id="photoNext" onclick="changePhoto(1)">›</button>
-    <div class="photo-nav" id="photoNav"></div>
   </div>
   <div class="detail-body" id="detailBody"></div>
   <div class="detail-actions" id="detailActions"></div>
 </div>
 
 <script>
-let map, placesService, geocoder;
+// ── API KEY ──
+const API_KEY = 'AIzaSyC21VAjnpDZIVbxo1NenZnD7b1PJ_fwy84';
+
+let map, placesService, userMarker, accuracyCircle;
 let markers = [], allPlaces = [], filteredPlaces = [];
 let activeCard = null;
-let currentSort = 'prominence', currentFilter = 'all';
+let currentSort = 'distance', currentFilter = 'all';
 let currentPhotos = [], currentPhotoIndex = 0;
 let currentLocation = null;
+let lastSearchLocation = null;
+const SEARCH_RADIUS = 5000;   // 5km radius
+const REFRESH_DISTANCE = 300; // refresh if moved 300m
 
-// ── API KEY ──
-const API_KEY = 'AIzaSyC21VAjnpDZIVbxo1NenZnD7b1PJ_fwy84' ;
+function startTracking() {
+  document.getElementById('permissionScreen').style.display = 'none';
+  loadGoogleMaps();
+  beginWatchingLocation();
+}
 
 function loadGoogleMaps() {
-  if (document.getElementById('gmapsScript')) return;
   const s = document.createElement('script');
-  s.id = 'gmapsScript';
   s.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places&callback=initMap`;
   s.async = true;
-  s.onerror = () => alert('Failed to load Google Maps. Check your API key and ensure Maps JavaScript API + Places API are enabled.');
+  s.onerror = () => alert('Failed to load Google Maps. Check your API key.');
   document.head.appendChild(s);
 }
 
-// Auto-load on page open
-loadGoogleMaps();
-
 window.initMap = function() {
-  document.getElementById('filtersBar').style.display = 'flex';
-  document.getElementById('sidebarHeader').style.display = 'block';
-
   map = new google.maps.Map(document.getElementById('map'), {
     center: { lat: 51.509865, lng: -0.118092 },
-    zoom: 12,
+    zoom: 15,
     styles: mapStyle(),
     mapTypeControl: false,
     streetViewControl: false,
     fullscreenControl: false,
   });
   placesService = new google.maps.places.PlacesService(map);
-  geocoder = new google.maps.Geocoder();
 };
 
-// ── SEARCH ──
-function searchCafes() {
-  const q = document.getElementById('searchInput').value.trim();
-  if (!map) { alert('Please apply your API key first.'); return; }
-  if (!q) { alert('Enter a location to search.'); return; }
-  setLoading();
-  geocoder.geocode({ address: q }, (results, status) => {
-    if (status === 'OK') {
-      currentLocation = results[0].geometry.location;
-      map.setCenter(currentLocation);
-      map.setZoom(12);
-      findCafes(currentLocation);
-    } else {
-      showError('Location not found. Try a different search.');
-    }
+// ── LIVE LOCATION ──
+function beginWatchingLocation() {
+  if (!navigator.geolocation) { setLocationError('Geolocation not supported.'); return; }
+  navigator.geolocation.watchPosition(onLocationUpdate, onLocationError, {
+    enableHighAccuracy: true, maximumAge: 10000, timeout: 15000
   });
 }
 
-function useMyLocation() {
-  if (!map) { alert('Please apply your API key first.'); return; }
-  if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
-  setLoading();
-  navigator.geolocation.getCurrentPosition(pos => {
-    currentLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+function onLocationUpdate(pos) {
+  const lat = pos.coords.latitude;
+  const lng = pos.coords.longitude;
+  const accuracy = pos.coords.accuracy;
+  currentLocation = { lat, lng };
+
+  document.getElementById('locationDot').className = 'location-dot';
+  document.getElementById('locationText').textContent = 'Live location active';
+
+  if (!map) { setTimeout(() => onLocationUpdate(pos), 500); return; }
+
+  if (!userMarker) {
+    // First time — create blue dot and accuracy circle
+    userMarker = new google.maps.Marker({
+      map, position: currentLocation, title: 'You are here',
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 10, fillColor: '#4285F4', fillOpacity: 1,
+        strokeColor: 'white', strokeWeight: 3,
+      },
+      zIndex: 999,
+    });
+    accuracyCircle = new google.maps.Circle({
+      map, center: currentLocation, radius: accuracy,
+      fillColor: '#4285F4', fillOpacity: 0.08,
+      strokeColor: '#4285F4', strokeOpacity: 0.3, strokeWeight: 1,
+    });
     map.setCenter(currentLocation);
-    map.setZoom(14);
-    findCafes(currentLocation);
-  }, () => showError('Could not get your location.'));
+    map.setZoom(15);
+    findCafes();
+  } else {
+    // Update position
+    userMarker.setPosition(currentLocation);
+    accuracyCircle.setCenter(currentLocation);
+    accuracyCircle.setRadius(accuracy);
+    // Refresh cafés if moved enough
+    if (lastSearchLocation && haversineDistance(lastSearchLocation, currentLocation) > REFRESH_DISTANCE) {
+      findCafes();
+    }
+  }
 }
 
-function findCafes(location) {
-  clearMarkers();
-  const req = { location, radius: 25000, keyword: 'independent cafe coffee shop espresso bar', types: ['cafe', 'bakery'] };
-  if (currentSort === 'distance') req.rankBy = google.maps.places.RankBy.DISTANCE;
-  else req.rankBy = google.maps.places.RankBy.PROMINENCE;
+function onLocationError() {
+  setLocationError('Location denied. Enable location in browser settings.');
+}
 
-  placesService.nearbySearch(req, (results, status) => {
+function setLocationError(msg) {
+  document.getElementById('locationDot').className = 'location-dot error';
+  document.getElementById('locationText').textContent = msg;
+}
+
+function recenter() {
+  if (map && currentLocation) { map.panTo(currentLocation); map.setZoom(15); }
+}
+
+// ── FIND CAFÉS ──
+function findCafes() {
+  if (!map || !placesService || !currentLocation) return;
+  lastSearchLocation = { ...currentLocation };
+  setLoading();
+  placesService.nearbySearch({
+    location: currentLocation,
+    radius: SEARCH_RADIUS,
+    keyword: 'cafe coffee shop espresso bar',
+    type: 'cafe'
+  }, (results, status) => {
     if (status === google.maps.places.PlacesServiceStatus.OK && results.length) {
       allPlaces = results.filter(p =>
-        p.types.includes('cafe') ||
-        p.types.includes('bakery') ||
+        p.types.includes('cafe') || p.types.includes('bakery') ||
         p.name.toLowerCase().includes('coffee') ||
         p.name.toLowerCase().includes('cafe') ||
         p.name.toLowerCase().includes('café')
       );
       applyFiltersAndSort();
     } else {
-      showError('No cafés found here. Try a different area.');
+      showError('No cafés found nearby. Try moving to a busier area.');
     }
   });
 }
@@ -328,30 +348,37 @@ function setFilter(val, el) {
 
 function applyFiltersAndSort() {
   let places = [...allPlaces];
-
-  // Filter
   if (currentFilter === 'open') places = places.filter(p => p.opening_hours?.isOpen?.() === true);
   if (currentFilter === 'rated') places = places.filter(p => p.rating >= 4);
-
-  // Sort
-  if (currentSort === 'rating') places.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-  if (currentSort === 'distance' && currentLocation) {
-    const ll = (p) => {
-      const loc = p.geometry.location;
-      const lat = typeof loc.lat === 'function' ? loc.lat() : loc.lat;
-      const lng = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
-      const clat = typeof currentLocation.lat === 'function' ? currentLocation.lat() : currentLocation.lat;
-      const clng = typeof currentLocation.lng === 'function' ? currentLocation.lng() : currentLocation.lng;
-      return Math.sqrt(Math.pow(lat - clat, 2) + Math.pow(lng - clng, 2));
-    };
-    places.sort((a, b) => ll(a) - ll(b));
+  if (currentSort === 'rating') places.sort((a, b) => (b.rating||0) - (a.rating||0));
+  if (currentSort === 'distance') {
+    places.sort((a, b) => getPlaceDistance(a) - getPlaceDistance(b));
   }
-
   filteredPlaces = places;
   clearMarkers();
   renderCards(filteredPlaces);
   filteredPlaces.forEach((p, i) => addMarker(p, i));
-  document.getElementById('resultsCount').textContent = `${filteredPlaces.length} café${filteredPlaces.length !== 1 ? 's' : ''} found`;
+  document.getElementById('resultsCount').textContent = `${filteredPlaces.length} café${filteredPlaces.length !== 1 ? 's' : ''} nearby`;
+}
+
+// ── DISTANCE ──
+function haversineDistance(a, b) {
+  const R = 6371000, toRad = x => x * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+  const s = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1-s));
+}
+
+function getPlaceDistance(place) {
+  if (!currentLocation) return 0;
+  const loc = place.geometry.location;
+  const lat = typeof loc.lat === 'function' ? loc.lat() : loc.lat;
+  const lng = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
+  return haversineDistance(currentLocation, { lat, lng });
+}
+
+function formatDistance(m) {
+  return m < 1000 ? `${Math.round(m)}m` : `${(m/1000).toFixed(1)}km`;
 }
 
 // ── RENDER CARDS ──
@@ -359,7 +386,7 @@ function renderCards(places) {
   const list = document.getElementById('cafeList');
   list.innerHTML = '';
   if (!places.length) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">No results</div><div class="empty-sub">Try adjusting the filters.</div></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">No results</div><div class="empty-sub">Try adjusting filters.</div></div>`;
     return;
   }
   places.forEach((place, i) => {
@@ -368,6 +395,7 @@ function renderCards(places) {
     card.id = `card-${i}`;
     const isOpen = place.opening_hours?.isOpen?.();
     const openHTML = isOpen === true ? '<span class="open-badge open">Open</span>' : isOpen === false ? '<span class="open-badge closed">Closed</span>' : '';
+    const dist = getPlaceDistance(place);
     const photoHTML = place.photos?.length
       ? `<img class="card-photo" src="${place.photos[0].getUrl({maxWidth:340,maxHeight:110})}" alt="${place.name}" loading="lazy">`
       : `<div class="card-photo-placeholder">☕</div>`;
@@ -379,7 +407,8 @@ function renderCards(places) {
         <div class="card-bottom">
           <div class="stars">${renderStars(place.rating)}</div>
           <span class="rating-text">${place.rating ? place.rating.toFixed(1) : '–'}</span>
-          <span class="review-count">${place.user_ratings_total ? `(${place.user_ratings_total.toLocaleString()})` : 'No reviews'}</span>
+          <span class="review-count">${place.user_ratings_total ? `(${place.user_ratings_total.toLocaleString()})` : ''}</span>
+          <span class="distance-badge">📍 ${formatDistance(dist)}</span>
         </div>
       </div>`;
     card.addEventListener('click', () => openDetail(place, i));
@@ -389,85 +418,67 @@ function renderCards(places) {
 
 // ── DETAIL PANEL ──
 function openDetail(place, index) {
-  // Highlight card
   if (activeCard !== null) document.getElementById(`card-${activeCard}`)?.classList.remove('active');
   activeCard = index;
   document.getElementById(`card-${index}`)?.classList.add('active');
-
-  // Pan map
-  if (place.geometry?.location) { map.panTo(place.geometry.location); map.setZoom(16); }
+  if (place.geometry?.location) { map.panTo(place.geometry.location); map.setZoom(17); }
   if (markers[index]) google.maps.event.trigger(markers[index], 'click');
 
-  // Fetch full details
   placesService.getDetails({
     placeId: place.place_id,
-    fields: ['name','rating','user_ratings_total','formatted_address','formatted_phone_number',
-             'website','opening_hours','photos','reviews','url','geometry']
+    fields: ['name','rating','user_ratings_total','formatted_address','formatted_phone_number','website','opening_hours','photos','reviews','url']
   }, (details, status) => {
-    if (status === google.maps.places.PlacesServiceStatus.OK) {
-      renderDetailPanel(details);
-    } else {
-      renderDetailPanel(place);
-    }
+    renderDetailPanel(status === google.maps.places.PlacesServiceStatus.OK ? details : place, place);
   });
 
   document.getElementById('detailPanel').classList.add('open');
   document.getElementById('overlay').classList.add('show');
 }
 
-function renderDetailPanel(p) {
-  // Photos
+function renderDetailPanel(p, originalPlace) {
   const photosEl = document.getElementById('detailPhotos');
-  const closeBtn = '<button class="btn-close" onclick="closeDetail()">✕</button>';
   currentPhotos = p.photos || [];
   currentPhotoIndex = 0;
+  photosEl.innerHTML = '<button class="btn-close" onclick="closeDetail()">✕</button>';
 
   if (currentPhotos.length) {
     const img = document.createElement('img');
-    img.id = 'detailMainPhoto';
-    img.src = currentPhotos[0].getUrl({ maxWidth: 760, maxHeight: 400 });
+    img.src = currentPhotos[0].getUrl({ maxWidth:760, maxHeight:400 });
     img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-    // Clear & rebuild
-    photosEl.innerHTML = closeBtn;
+    photosEl.appendChild(img);
     if (currentPhotos.length > 1) {
       photosEl.innerHTML += `<button class="photo-prev" onclick="changePhoto(-1)">‹</button><button class="photo-next" onclick="changePhoto(1)">›</button>`;
       const nav = document.createElement('div');
-      nav.className = 'photo-nav';
-      nav.id = 'photoNav';
-      currentPhotos.slice(0,5).forEach((_, i) => {
+      nav.className = 'photo-nav'; nav.id = 'photoNav';
+      currentPhotos.slice(0,5).forEach((_,i) => {
         const dot = document.createElement('div');
-        dot.className = 'photo-dot' + (i === 0 ? ' active' : '');
+        dot.className = 'photo-dot'+(i===0?' active':'');
         dot.onclick = () => goToPhoto(i);
         nav.appendChild(dot);
       });
       photosEl.appendChild(nav);
     }
-    photosEl.insertBefore(img, photosEl.querySelector('.photo-prev') || photosEl.querySelector('.photo-nav') || null);
-    photosEl.insertBefore(img, photosEl.children[1]);
   } else {
-    photosEl.innerHTML = closeBtn + '<div class="detail-photos-placeholder">☕</div>';
+    photosEl.innerHTML += '<div class="detail-photos-placeholder">☕</div>';
   }
 
-  // Info
   const isOpen = p.opening_hours?.isOpen?.();
   const openBadge = isOpen === true ? '<span class="open-badge open" style="font-size:0.75rem;padding:3px 9px">Open Now</span>'
     : isOpen === false ? '<span class="open-badge closed" style="font-size:0.75rem;padding:3px 9px">Closed</span>' : '';
+  const dist = getPlaceDistance(originalPlace || p);
+  const distBadge = `<span style="background:var(--foam);border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:600;color:var(--mocha)">📍 ${formatDistance(dist)} away</span>`;
 
   let hoursHTML = '';
   if (p.opening_hours?.weekday_text) {
-    hoursHTML = `<div class="info-row"><span class="info-icon">🕐</span><div class="info-text">${p.opening_hours.weekday_text.join('<br>')}</div></div>`;
+    hoursHTML = `<div class="info-row"><span class="info-icon">🕐</span><div class="info-text" style="font-size:0.78rem">${p.opening_hours.weekday_text.join('<br>')}</div></div>`;
   }
 
-  const body = document.getElementById('detailBody');
-  body.innerHTML = `
+  document.getElementById('detailBody').innerHTML = `
     <div class="detail-name">${p.name}</div>
     <div class="detail-meta">
-      <div class="detail-rating">
-        <div class="stars">${renderStars(p.rating)}</div>
-        <span class="detail-rating-num">${p.rating ? p.rating.toFixed(1) : '–'}</span>
-      </div>
+      <div class="detail-rating"><div class="stars">${renderStars(p.rating)}</div><span class="detail-rating-num">${p.rating ? p.rating.toFixed(1) : '–'}</span></div>
       <span class="detail-reviews-count">${p.user_ratings_total ? `${p.user_ratings_total.toLocaleString()} reviews` : 'No reviews'}</span>
-      ${openBadge}
+      ${openBadge} ${distBadge}
     </div>
     <div class="detail-info">
       ${p.formatted_address ? `<div class="info-row"><span class="info-icon">📍</span><div class="info-text">${p.formatted_address}</div></div>` : ''}
@@ -480,20 +491,15 @@ function renderDetailPanel(p) {
       <div class="reviews-list">
         ${p.reviews.slice(0,5).map(r => `
           <div class="review-card">
-            <div class="review-top">
-              <span class="reviewer-name">${r.author_name}</span>
-              <span class="review-time">${r.relative_time_description}</span>
-            </div>
+            <div class="review-top"><span class="reviewer-name">${r.author_name}</span><span class="review-time">${r.relative_time_description}</span></div>
             <div class="review-stars">${renderStars(r.rating)}</div>
             <div class="review-text">${r.text || '<em>No written review.</em>'}</div>
           </div>`).join('')}
       </div>` : ''}
   `;
 
-  // Actions
-  const actions = document.getElementById('detailActions');
   const mapsUrl = p.url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name)}`;
-  actions.innerHTML = `
+  document.getElementById('detailActions').innerHTML = `
     <a class="btn-action btn-directions" href="${mapsUrl}" target="_blank" rel="noopener">🗺️ Directions</a>
     ${p.website ? `<a class="btn-action btn-website" href="${p.website}" target="_blank" rel="noopener">🌐 Website</a>` : ''}
     ${p.formatted_phone_number ? `<a class="btn-action btn-website" href="tel:${p.formatted_phone_number}">📞 Call</a>` : ''}
@@ -516,28 +522,30 @@ function changePhoto(dir) {
 function goToPhoto(i) {
   currentPhotoIndex = i;
   const img = document.getElementById('detailPhotos').querySelector('img');
-  if (img) img.src = currentPhotos[i].getUrl({ maxWidth: 760, maxHeight: 400 });
-  document.querySelectorAll('.photo-dot').forEach((d, idx) => d.classList.toggle('active', idx === i));
+  if (img) img.src = currentPhotos[i].getUrl({ maxWidth:760, maxHeight:400 });
+  document.querySelectorAll('.photo-dot').forEach((d,idx) => d.classList.toggle('active', idx===i));
 }
 
 // ── MARKERS ──
 function addMarker(place, index) {
   const marker = new google.maps.Marker({
-    map,
-    position: place.geometry.location,
-    title: place.name,
+    map, position: place.geometry.location, title: place.name,
     icon: {
       path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
-      fillColor: '#6B3F2A', fillOpacity: 1, strokeColor: '#F5EFE6', strokeWeight: 1.5,
-      scale: 1.5, anchor: new google.maps.Point(12, 22),
+      fillColor:'#6B3F2A', fillOpacity:1, strokeColor:'#F5EFE6', strokeWeight:1.5,
+      scale:1.5, anchor: new google.maps.Point(12,22),
     }
   });
 
+  const dist = getPlaceDistance(place);
   const iw = new google.maps.InfoWindow({
     content: `<div style="font-family:'DM Sans',sans-serif;padding:4px 6px;min-width:160px">
       <div style="font-family:'Playfair Display',serif;font-size:0.95rem;font-weight:700;color:#2C1A0E;margin-bottom:3px">${place.name}</div>
-      <div style="font-size:0.75rem;color:#6B3F2A;margin-bottom:4px">${place.vicinity || ''}</div>
-      <div style="font-size:0.8rem;color:#f59e0b">★ <strong style="color:#2C1A0E">${place.rating ? place.rating.toFixed(1) : '–'}</strong> <span style="color:#999">${place.user_ratings_total ? `· ${place.user_ratings_total.toLocaleString()}` : ''}</span></div>
+      <div style="font-size:0.75rem;color:#6B3F2A;margin-bottom:4px">${place.vicinity||''}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:#f59e0b;font-size:0.8rem">★ <strong style="color:#2C1A0E">${place.rating ? place.rating.toFixed(1) : '–'}</strong></span>
+        <span style="font-size:0.75rem;color:#6B3F2A;font-weight:600">📍 ${formatDistance(dist)}</span>
+      </div>
     </div>`
   });
 
@@ -550,34 +558,30 @@ function addMarker(place, index) {
     document.getElementById(`card-${index}`)?.classList.add('active');
     document.getElementById(`card-${index}`)?.scrollIntoView({ behavior:'smooth', block:'nearest' });
   });
-
   marker._iw = null;
   markers[index] = marker;
 }
 
 function clearMarkers() {
   markers.forEach(m => { m._iw?.close(); m.setMap(null); });
-  markers = [];
-  activeCard = null;
+  markers = []; activeCard = null;
 }
 
 // ── HELPERS ──
 function renderStars(rating) {
   if (!rating) return '<span style="font-size:0.72rem;color:#aaa">No rating</span>';
-  return Array.from({length:5}, (_,i) => `<span class="star ${i < Math.round(rating) ? 'filled' : 'empty'}">★</span>`).join('');
+  return Array.from({length:5},(_,i) => `<span class="star ${i<Math.round(rating)?'filled':'empty'}">★</span>`).join('');
 }
 
 function setLoading() {
   document.getElementById('cafeList').innerHTML = `<div class="empty-state"><div class="spinner"></div><div class="empty-title">Finding cafés…</div></div>`;
-  document.getElementById('resultsCount').textContent = 'Searching…';
+  document.getElementById('resultsCount').textContent = 'Searching nearby…';
 }
 
 function showError(msg) {
   document.getElementById('cafeList').innerHTML = `<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-title">Nothing found</div><div class="empty-sub">${msg}</div></div>`;
   document.getElementById('resultsCount').textContent = '0 results';
 }
-
-document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchCafes(); });
 
 function mapStyle() {
   return [
