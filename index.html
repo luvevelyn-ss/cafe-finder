@@ -61,7 +61,7 @@ header { background:var(--espresso); padding:12px 20px; display:flex; align-item
 .cafe-card { background:white; border-radius:12px; overflow:hidden; cursor:pointer; transition:box-shadow 0.2s,transform 0.15s; border:2px solid transparent; box-shadow:0 1px 4px var(--shadow); }
 .cafe-card:hover { box-shadow:0 4px 14px var(--shadow); transform:translateY(-1px); }
 .cafe-card.active { border-color:var(--latte); }
-.card-photo { width:100%; height:110px; object-fit:cover; display:block; background:#e8ddd0; }
+.card-photo { width:100%; height:110px; object-fit:cover; display:block; background:#e8ddd0; image-rendering:auto; -webkit-backface-visibility:hidden; }
 .card-photo-placeholder { width:100%; height:110px; background:linear-gradient(135deg,#e8ddd0,#d4c4b0); display:flex; align-items:center; justify-content:center; font-size:2rem; color:rgba(107,63,42,0.3); }
 .card-body { padding:10px 12px 11px; }
 .card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:6px; margin-bottom:3px; }
@@ -397,7 +397,7 @@ function renderCards(places) {
     const openHTML = isOpen === true ? '<span class="open-badge open">Open</span>' : isOpen === false ? '<span class="open-badge closed">Closed</span>' : '';
     const dist = getPlaceDistance(place);
     const photoHTML = place.photos?.length
-      ? `<img class="card-photo" src="${place.photos[0].getUrl({maxWidth:680,maxHeight:220})}" alt="${place.name}" loading="lazy">`
+      ? `<img class="card-photo" src="${place.photos[0].getUrl({maxWidth:800,maxHeight:400})}" alt="${place.name}" loading="lazy">`
       : `<div class="card-photo-placeholder">☕</div>`;
     card.innerHTML = `
       ${photoHTML}
