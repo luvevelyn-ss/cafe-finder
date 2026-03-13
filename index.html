@@ -291,7 +291,7 @@ function useMyLocation() {
 
 function findCafes(location) {
   clearMarkers();
-  const req = { location, radius: 50000, type: 'cafe' };
+  const req = { location, radius: 50000, type: 'cafe', keyword: 'cafe coffee espresso' };
   if (currentSort === 'distance') req.rankBy = google.maps.places.RankBy.DISTANCE;
   else req.rankBy = google.maps.places.RankBy.PROMINENCE;
 
