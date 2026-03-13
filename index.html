@@ -291,13 +291,19 @@ function useMyLocation() {
 
 function findCafes(location) {
   clearMarkers();
-  const req = { location, radius: 50000, type: 'cafe', keyword: 'cafe coffee espresso' };
+  const req = { location, radius: 25000, keyword: 'independent cafe coffee shop espresso bar', types: ['cafe', 'bakery'] };
   if (currentSort === 'distance') req.rankBy = google.maps.places.RankBy.DISTANCE;
   else req.rankBy = google.maps.places.RankBy.PROMINENCE;
 
   placesService.nearbySearch(req, (results, status) => {
     if (status === google.maps.places.PlacesServiceStatus.OK && results.length) {
-      allPlaces = results;
+      allPlaces = results.filter(p =>
+        p.types.includes('cafe') ||
+        p.types.includes('bakery') ||
+        p.name.toLowerCase().includes('coffee') ||
+        p.name.toLowerCase().includes('cafe') ||
+        p.name.toLowerCase().includes('café')
+      );
       applyFiltersAndSort();
     } else {
       showError('No cafés found here. Try a different area.');
