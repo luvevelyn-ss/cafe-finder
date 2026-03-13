@@ -175,15 +175,6 @@ header { background:var(--espresso); padding:12px 20px; display:flex; align-item
 
 <div class="main">
   <div class="sidebar" id="sidebar">
-    <div class="api-banner" id="apiBanner">
-      <h3>🔑 Enter your API Key</h3>
-      <p>Paste your Google Maps API key to start discovering cafés with photos, reviews & more.</p>
-      <div class="api-input-row">
-        <input class="api-input" type="password" id="apiKeyInput" placeholder="AIza…" />
-        <button class="btn-apply" onclick="applyApiKey()">Apply</button>
-      </div>
-    </div>
-
     <div class="filters" id="filtersBar">
       <div class="filter-row">
         <span class="filter-label">Sort</span>
@@ -231,36 +222,34 @@ header { background:var(--espresso); padding:12px 20px; display:flex; align-item
 <script>
 let map, placesService, geocoder;
 let markers = [], allPlaces = [], filteredPlaces = [];
-let activeCard = null, apiKey = '';
+let activeCard = null;
 let currentSort = 'prominence', currentFilter = 'all';
 let currentPhotos = [], currentPhotoIndex = 0;
 let currentLocation = null;
 
 // ── API KEY ──
-function applyApiKey() {
-  apiKey = document.getElementById('apiKeyInput').value.trim();
-  if (!apiKey) { alert('Please enter a valid API key.'); return; }
-  loadGoogleMaps();
-}
+const API_KEY = AIzaSyDbOh4bSZmLNw8hpoXtrgjWV6LbOvRJybo ;
 
 function loadGoogleMaps() {
   if (document.getElementById('gmapsScript')) return;
   const s = document.createElement('script');
   s.id = 'gmapsScript';
-  s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places&callback=initMap`;
   s.async = true;
   s.onerror = () => alert('Failed to load Google Maps. Check your API key and ensure Maps JavaScript API + Places API are enabled.');
   document.head.appendChild(s);
 }
 
+// Auto-load on page open
+loadGoogleMaps();
+
 window.initMap = function() {
-  document.getElementById('apiBanner').style.display = 'none';
   document.getElementById('filtersBar').style.display = 'flex';
   document.getElementById('sidebarHeader').style.display = 'block';
 
   map = new google.maps.Map(document.getElementById('map'), {
     center: { lat: 51.509865, lng: -0.118092 },
-    zoom: 13,
+    zoom: 12,
     styles: mapStyle(),
     mapTypeControl: false,
     streetViewControl: false,
@@ -280,7 +269,7 @@ function searchCafes() {
     if (status === 'OK') {
       currentLocation = results[0].geometry.location;
       map.setCenter(currentLocation);
-      map.setZoom(14);
+      map.setZoom(12);
       findCafes(currentLocation);
     } else {
       showError('Location not found. Try a different search.');
@@ -302,7 +291,7 @@ function useMyLocation() {
 
 function findCafes(location) {
   clearMarkers();
-  const req = { location, radius: 1000, type: 'cafe' };
+  const req = { location, radius: 50000, type: 'cafe' };
   if (currentSort === 'distance') req.rankBy = google.maps.places.RankBy.DISTANCE;
   else req.rankBy = google.maps.places.RankBy.PROMINENCE;
 
