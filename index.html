@@ -397,7 +397,7 @@ function renderCards(places) {
     const openHTML = isOpen === true ? '<span class="open-badge open">Open</span>' : isOpen === false ? '<span class="open-badge closed">Closed</span>' : '';
     const dist = getPlaceDistance(place);
     const photoHTML = place.photos?.length
-      ? `<img class="card-photo" src="${place.photos[0].getUrl({maxWidth:340,maxHeight:110})}" alt="${place.name}" loading="lazy">`
+      ? `<img class="card-photo" src="${place.photos[0].getUrl({maxWidth:680,maxHeight:220})}" alt="${place.name}" loading="lazy">`
       : `<div class="card-photo-placeholder">☕</div>`;
     card.innerHTML = `
       ${photoHTML}
