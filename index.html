@@ -95,6 +95,12 @@ header { background:var(--espresso); padding:0 16px; height:var(--header-height)
 /* ── MAP ── */
 #map { flex:1; min-width:0; }
 
+/* ── HIDE ALL GOOGLE MAP CONTROLS ── */
+.gm-bundled-control,
+.gm-bundled-control-on-bottom,
+.gmnoprint,
+.gm-control-active { display:none !important; }
+
 /* ── DETAIL PANEL ── */
 .detail-panel { position:fixed; top:var(--header-height); right:0; width:380px; height:calc(100vh - var(--header-height)); background:white; z-index:100; box-shadow:-4px 0 30px rgba(44,26,14,0.15); transform:translateX(100%); transition:transform 0.35s cubic-bezier(0.4,0,0.2,1); display:flex; flex-direction:column; overflow:hidden; }
 .detail-panel.open { transform:translateX(0); }
@@ -167,7 +173,6 @@ header { background:var(--espresso); padding:0 16px; height:var(--header-height)
   :root { --sidebar-width: 280px; }
   .detail-panel { width:320px; }
 }
-
 @media (max-width: 640px) {
   .sidebar { display:none; }
   .bottom-sheet { display:flex; }
@@ -278,7 +283,7 @@ let currentLocation = null;
 let lastSearchLocation = null;
 let sheetExpanded = false;
 
-const SEARCH_RADIUS = 25000;   // 2km — tight and relevant
+const SEARCH_RADIUS = 25000;  // 25km
 const REFRESH_DISTANCE = 300; // refresh if moved 300m
 
 // ── START ──
@@ -304,8 +309,8 @@ window.initMap = function() {
     mapTypeControl: false,
     streetViewControl: false,
     fullscreenControl: false,
-    zoomControl: false,          // ← removes +/- buttons
-    keyboardShortcuts: false,    // ← removes keyboard arrow controls
+    zoomControl: false,
+    keyboardShortcuts: false,
   });
   placesService = new google.maps.places.PlacesService(map);
 };
@@ -329,14 +334,12 @@ function onLocationUpdate(pos) {
   document.getElementById('locationDot').className = 'location-dot';
   document.getElementById('locationText').textContent = 'Live location active';
 
-  // Wait for map to be ready before doing anything
   if (!map || !placesService) {
     setTimeout(() => onLocationUpdate(pos), 500);
     return;
   }
 
   if (!userMarker) {
-    // First time — place blue dot and search from exact position
     userMarker = new google.maps.Marker({
       map,
       position: { lat, lng },
@@ -362,22 +365,19 @@ function onLocationUpdate(pos) {
       strokeWeight: 1,
     });
     map.setCenter({ lat, lng });
-    map.setZoom(15);
+    map.setZoom(13); // zoom out a bit to show 25km area
     findCafes();
   } else {
-    // Already tracking — just update dot position
     userMarker.setPosition({ lat, lng });
     accuracyCircle.setCenter({ lat, lng });
     accuracyCircle.setRadius(accuracy);
-
-    // Re-search only if moved significantly
     if (lastSearchLocation && haversineDistance(lastSearchLocation, { lat, lng }) > REFRESH_DISTANCE) {
       findCafes();
     }
   }
 }
 
-function onLocationError(err) {
+function onLocationError() {
   setLocationError('Location denied. Enable location in browser settings and reload.');
 }
 
@@ -389,7 +389,7 @@ function setLocationError(msg) {
 function recenter() {
   if (map && currentLocation) {
     map.panTo(currentLocation);
-    map.setZoom(15);
+    map.setZoom(13);
   }
 }
 
@@ -400,23 +400,44 @@ function toggleSheet() {
   document.getElementById('btnToggleList').textContent = sheetExpanded ? '✕ Close' : '☰ List';
 }
 
-// ── FIND CAFÉS ── (always searches from exact current position)
+// ── FIND CAFÉS (fetches up to 60 results using pagination) ──
 function findCafes() {
   if (!map || !placesService || !currentLocation) return;
 
-  // Snapshot the location RIGHT NOW so it doesn't change mid-search
   const searchAt = { lat: currentLocation.lat, lng: currentLocation.lng };
   lastSearchLocation = { ...searchAt };
+  allPlaces = []; // reset before new search
   setLoading();
 
-  placesService.nearbySearch({
+  const req = {
     location: searchAt,
     radius: SEARCH_RADIUS,
     keyword: 'cafe coffee shop espresso bar',
     type: 'cafe'
-  }, (results, status) => {
+  };
+
+  // Callback handles pagination to get up to 60 results
+  function handleResults(results, status, pagination) {
     if (status === google.maps.places.PlacesServiceStatus.OK && results.length) {
-      allPlaces = results.filter(p =>
+      allPlaces = [...allPlaces, ...results];
+
+      if (pagination && pagination.hasNextPage) {
+        // Wait 500ms then fetch next page (Google requires a delay)
+        setTimeout(() => pagination.nextPage(), 500);
+      } else {
+        // All pages loaded — now filter and display
+        allPlaces = allPlaces.filter(p =>
+          p.types.includes('cafe') ||
+          p.types.includes('bakery') ||
+          p.name.toLowerCase().includes('coffee') ||
+          p.name.toLowerCase().includes('cafe') ||
+          p.name.toLowerCase().includes('café')
+        );
+        applyFiltersAndSort();
+      }
+    } else if (allPlaces.length > 0) {
+      // Had some results from earlier pages, show them
+      allPlaces = allPlaces.filter(p =>
         p.types.includes('cafe') ||
         p.types.includes('bakery') ||
         p.name.toLowerCase().includes('coffee') ||
@@ -427,7 +448,9 @@ function findCafes() {
     } else {
       showError('No cafés found nearby. Try moving to a busier area.');
     }
-  });
+  }
+
+  placesService.nearbySearch(req, handleResults);
 }
 
 // ── FILTERS & SORT ──
@@ -545,7 +568,7 @@ function openDetail(place, index) {
   document.getElementById(`card-${index}`)?.classList.add('active');
   document.getElementById(`scard-${index}`)?.classList.add('active');
 
-  if (place.geometry?.location) { map.panTo(place.geometry.location); map.setZoom(17); }
+  if (place.geometry?.location) { map.panTo(place.geometry.location); map.setZoom(16); }
   if (markers[index]) google.maps.event.trigger(markers[index], 'click');
 
   placesService.getDetails({
