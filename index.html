@@ -93,7 +93,8 @@ header { background:var(--espresso); padding:0 16px; height:var(--header-height)
 @keyframes spin { to { transform:rotate(360deg); } }
 
 /* ── MAP ── */
-#map { flex:1; min-width:0; }
+#map { flex:1; min-width:0; cursor:grab; }
+#map:active { cursor:grabbing; }
 
 /* ── HIDE ALL GOOGLE MAP CONTROLS ── */
 .gm-bundled-control,
